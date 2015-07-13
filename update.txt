@@ -1,6 +1,5 @@
 What are you working on?
 -We are working on implementing Lisp in Python
-
 What’s your implementation language?
 -Python!!
 What have you done so far? Did you meet your expectations for this week yet?
