@@ -1,41 +1,74 @@
 import re
+import operator
+
+
 #PyLisp 
 #interpreter for Common Lisp written in python
 
-line = "( 2 - 1 )"
+#Sample Data
+line = "( * ( 2 ) ( - 130 2 ) ( + 1 1 1 1 ) ( / 696969696969696969696969 696969696969696969696969 ) )"
+
+#Reducer: takes an operator i.e. "+" and a list of ints to reduce
+def reducer(operation, listOfNumbers):
+
+    #getOperator: takes the operator from reducer and returns the mathematical function it entails
+    def getOperator(operation):
+
+        return {'+' : operator.add,'-' : operator.sub,'*' : operator.mul,'/' : operator.div,'%' : operator.mod,}[operation]
+
+    return reduce(lambda x, y: (getOperator(operation)(x,y)), listOfNumbers)
+
+#Interpret a line of Lisp
 def process_line(line):
     opstack = []
     operandStack = []
+    operands = []
+    finalOperands = []
 
-    for x in line.split():
-        if x == "(" or x == "+" or x == "-" or x == "*" or x == "/":
+    #Iterate through list of Lisp code
+    for index, x in enumerate(line.split()):
+
+        if x in ["(", "+", "-", "*", "/", "%"]:
             opstack.append(x)
 
         if x.isdigit():
-            operandStack.append(x) 
+            operandStack.append(int(x)) 
 
         if x == ")":
-            op1=operandStack.pop()
-            op2=operandStack.pop()
-            op=opstack.pop()
-            #op = opstack.pop()
 
-            if op == "+":
-                operandStack.append(int(op1)+int(op2))
+            #If we get to the last ')'
+            if index == (len(line.split()) - 1) - line.split()[::-1].index(')'):
+                
+                for item in finalOperands:
+                    operands.append(item)
 
-            elif op == "-":
-                operandStack.append(int(op2)-int(op1))
+                op = opstack.pop()
+        
+                print "LISP EXPRESSION: ", line , "\n\nEvaluates to: ", reducer(op, operands), "\n"
 
-            elif op == "*":
-                operandStack.append(int(op1)*int(op2))
+                break
 
-            elif op == "/":
-                operandStack.append(int(op2)/int(op1))
+            for item in operandStack:
+                operands.append(item)
+            
+            operandStack = []
 
-    if not operandStack:
-        return "Invalid expression"
+            #Get operation
+            op = opstack.pop()
 
-    #operandStack[0]
-    print operandStack
+            #Account for single nums in parens => ( 3 )
+            if not op in ["+", "-", "*", "/", "%"]:
+                finalOperands.append(operands[0])   
+
+            else:
+
+                #Get rid of '('
+                opstack.pop()
+                
+                #Append inner result to finalOperands
+
+                finalOperands.append(reducer(op, operands))
+
+            operands = []
 
 process_line(line)
