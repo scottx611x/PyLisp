@@ -2,7 +2,6 @@
 ###A simple Lisp interpreter written in Python
 
 ##Valid inputs:
-####(2)
 ####(+ (3)(/ 10 10))
 ####(- (3)(* 10 10))
 ####(* (2)(% 130 2)(+ 1 1 1 1)(/ 9745939781548 101912))
