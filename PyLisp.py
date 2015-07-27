@@ -1,32 +1,52 @@
 import re, operator
 
-
 #PyLisp 
-#interpreter for Lisp written in python
+#Simple LISP interpreter written in Python
+#Scott Ouellette 
 
-#Sample Data
+global line, validOps
+
+#SAMPLE LISP EXPRESSIONS
+
+#line = "( 1 )" ----------------------> NOT WORKING
+#line = "(+ (3)(/ 10 10))"
+#line = "(* (4) ( + 2 1 ))"
 line = "(* (2)(- 130 2)(+ 1 1 1 1)(/ 9745939781548 101912))"
+#line = "( * ( 2 ) ( - 130 2 ) ( + 1 1 1 1 ) ( / 9745939781548 101912 ) )"
+print "LISP EXPRESSION BEFORE FORMATTING:\n", line
+
+validOps = ["+", "-", "*", "/", "%"]
 
 #Do formatting on bad input data
-validOps = ["+", "-", "*", "/", "%"]
-for validOp in validOps:
-    if validOp in line:
-        line = line.replace("(%s" % validOp, "( %s" % validOp)
-        line = line.replace("%s(" % validOp, "%s (" % validOp)
-line = re.sub(r"(\d)(\))", r"\1 \2", line)
-line = re.sub(r"(\()(\d)", r"\1 \2", line)
-rep = {"((" : "( (", "))" : ") )", ")(" : ") ("}
-rep = dict((re.escape(k), v) for k, v in rep.iteritems())
-pattern = re.compile("|".join(rep.keys()))
-line = pattern.sub(lambda m: rep[re.escape(m.group(0))], line)
+def formatLine(line):
+    for validOp in validOps:
 
-#Reducer: takes an operator i.e. "+" and a list of ints to reduce
+        if validOp in line:
+
+            line = line.replace("(%s" % validOp, "( %s" % validOp)
+            line = line.replace("%s(" % validOp, "%s (" % validOp)
+
+        line = re.sub(r"(\d)(\))", r"\1 \2", line)
+        line = re.sub(r"(\()(\d)", r"\1 \2", line)
+
+        rep = {"((" : "( (", "))" : ") )", ")(" : ") ("}
+        rep = dict((re.escape(k), v) for k, v in rep.iteritems())
+
+        pattern = re.compile("|".join(rep.keys()))
+        line = pattern.sub(lambda m: rep[re.escape(m.group(0))], line)
+    #print line
+
+    return line
+
+#Reducer: takes an operator i.e. "+" and a list of ints to reduce to a single number
 def reducer(operation, listOfNumbers):
+
     op = {'+' : operator.add,'-' : operator.sub,'*' : operator.mul,'/' : operator.div, '%' : operator.mod,}[operation]
     return reduce(lambda x, y: (op(x,y)), listOfNumbers)
 
 #Interpret a line of Lisp
-def process_line(line):
+def processLine(line):
+
     opstack = []
     operandStack = []
     operands = []
@@ -34,29 +54,42 @@ def process_line(line):
 
     #Iterate through list of Lisp code
     for index, x in enumerate(line.split()):
+
         if x in ["(", "+", "-", "*", "/", "%"]:
             opstack.append(x)
+        
         if x.isdigit():
+
             operandStack.append(int(x)) 
-        if x == ")":
-            
-            #If we get to the last ')'
-            if index == (len(line.split()) - 1) - line.split()[::-1].index(')'):
-                for item in finalOperands:
-                    operands.append(item)
-                op = opstack.pop()
-                print "LISP EXPRESSION: ", line , "\n\nEvaluates to: ", reducer(op, operands), "\n"
-                break
-            for item in operandStack:
+
+        #If we get to the last ')'
+        if x == ")" and index == (len(line.split()) - 1) - line.split()[::-1].index(')'):
+
+            for item in finalOperands:
+
                 operands.append(item)
+
+            op = opstack.pop()
+    
+            print "\nLISP EXPRESSION AFTER FORMATTING:\n", line , "\n\nEvaluates to: ", reducer(op, operands), "\n"
+            
+            break
+
+        elif x == ")":
+            for item in operandStack:
+
+                operands.append(item)
+
             operandStack = []
 
             #Get operation
             op = opstack.pop()
-
+            
             #Account for single nums in parens => ( 3 )
             if not op in ["+", "-", "*", "/", "%"]:
-                finalOperands.append(operands[0])   
+
+                finalOperands.append(operands[0])  
+
             else:
                 
                 #Get rid of '('
@@ -64,5 +97,13 @@ def process_line(line):
 
                 #Append inner result to finalOperands
                 finalOperands.append(reducer(op, operands))
+
             operands = []
-process_line(line)
+
+########### RUN #############
+processLine(formatLine(line))
+
+
+
+
+
