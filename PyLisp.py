@@ -1,8 +1,10 @@
-import re, operator
+import re, operator, sys
 
 #PyLisp 
 #Simple LISP interpreter written in Python
 #Scott Ouellette 
+
+line = sys.argv[1]
 
 global line, validOps
 
@@ -11,9 +13,9 @@ global line, validOps
 #line = "( 1 )" ----------------------> NOT WORKING
 #line = "(+ (3)(/ 10 10))"
 #line = "(* (4) ( + 2 1 ))"
-line = "(* (2)(- 130 2)(+ 1 1 1 1)(/ 9745939781548 101912))"
+#line = "(* (2)(- 130 2)(+ 1 1 1 1)(/ 9745939781548 101912))"
 #line = "( * ( 2 ) ( - 130 2 ) ( + 1 1 1 1 ) ( / 9745939781548 101912 ) )"
-print "LISP EXPRESSION BEFORE FORMATTING:\n", line
+line = line.replace("\\"," ")
 
 validOps = ["+", "-", "*", "/", "%"]
 
@@ -34,7 +36,6 @@ def formatLine(line):
 
         pattern = re.compile("|".join(rep.keys()))
         line = pattern.sub(lambda m: rep[re.escape(m.group(0))], line)
-    #print line
 
     return line
 
@@ -71,7 +72,7 @@ def processLine(line):
 
             op = opstack.pop()
     
-            print "\nLISP EXPRESSION AFTER FORMATTING:\n", line , "\n\nEvaluates to: ", reducer(op, operands), "\n"
+            print "<div align = 'center' class = 'output' style='text-align:center;'><br>LISP EXPRESSION:<br>", line , "</div><div align = 'center' class = 'output' style='text-align:center;'><br>Evaluates to:<br>", reducer(op, operands), "</div>"
             
             break
 
